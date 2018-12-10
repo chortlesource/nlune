@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-LUNE - lune.hpp
+NLUNE - lune.hpp
 
 Adapted from "moontool.c" by John Walker, Release 2.5 (See http://www.fourmilab.ch/moontool/)
 and Pyphoon by Igor Chubin, 2016 (See https://github.com/chubin/pyphoon)
@@ -27,7 +27,100 @@ DEALINGS IN THE SOFTWARE.
 
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <lune.hpp>
+#include <nlune.hpp>
+
+
+// ------- Astronomical Constants
+
+static const float epoch = 2444238.5;        // 1980 January 0.0
+
+
+// ------- Constants Defining the Sun's apparent orbit
+
+static const float s_elonge = 278.833540;      // Ecliptic longitude of the Sun at epoch 1980.0
+static const float s_elongp = 282.596403;      // Ecliptic longitude of the Sun at perigee
+static const float s_eccent = 0.016718;        // Eccentricity of earths orbit
+static const float s_smax = 1.49585e8;      // Semi-major axis of Earth's orbit, in kilometers
+static const float s_angsiz = 0.533128;     // Sun's angular size, in degrees, at semi-major axis distance
+
+
+// ------- Elements of the Moon's Orbit
+
+static const float m_mlong = 64.975464;       // Moon's mean longitude at the epoch
+static const float m_mlongp = 349.383063;     // Mean longitude of the perigee at the epoch
+static const float m_mlnode = 151.950429;      // Mean longitude of the node at the epoch
+static const float m_inc = 5.145396;          // Inclination of the Moon's orbit
+static const float m_mecc = 0.054900;          // Eccentricity of the Moon's orbit
+static const float m_angsiz = 0.5181;         // Moon's angular size at distance a from Earth
+static const float m_smax = 384401.0;         // Semi-mojor axis of the Moon's orbit, in kilometers
+static const float m_parallax = 0.9507;       // Parallax at a distance a from Earth
+static const float synmonth = 29.53058868;   // Synodic month (new Moon to new Moon), in days
+static const float lunatbase = 2423436.0;    // Base date for E. W. Brown's numbered series of lunations (1923 January 16)
+
+
+// ------- Properties of the Earth
+
+static const float earthrad = 6378.16;       // Properties of the Earth
+
+
+// ------- Other static variables used
+
+static const float precision = 0.05;
+static const float newmoon = 0 / 4.0;
+static const float firstmoon = 1 / 4.0;
+static const float fullmoon = 2 / 4.0;
+static const float lastmoon = 3 / 4.0;
+static const float nextmoon = 4 / 4.0;
+// static const float moon_aspect = 0.5;
+
+static const std::vector<std::string> phase_label {
+  "New Moon",
+  "Waxing Crescent Moon",
+  "First Quarter Moon",
+  "Waxing Gibbous Moon",
+  "Full Moon",
+  "Waning Gibbous Moon",
+  "Last Quarter Moon",
+  "Waning Crescent Moon",
+  "New Moon"
+};
+
+/*static const std::vector<std::string> moon_ascii {
+  "                  .------------.                 ",
+  "             .---' o     .  .   `---.            ",
+  "          .-'   .    O    .       .  `-.         ",
+  "        .'@   @@@@@@@   .   @@@@@       `.       ",
+  "      .'@@  @@@@@@@@@@@    @@@@@@@   .    `.     ",
+  "     /    o @@@@@@@@@@@    @@@@@@@       .  \\    ",
+  "    /@  o   @@@@@@@@@@@.    @@@@@@@   O      \\   ",
+  "   /@@@   .   @@@@@@@o     @@@@@@@@@@     @@@ \\  ",
+  "  /@@@@@               .  @@@@@@@@@@@@@ o @@@@ \\ ",
+  "  |@@@@  O  `.-./  .       @@@@@@@@@@@@    @@  | ",
+  " / @@@@    --`-'       o      @@@@@@@@ @@@@     \\ ",
+  " |@ @@@     @  `           .   @@     @@@@@@@   |",
+  " |      @           o          @      @@@@@@@   |",
+  " \\       @@            .-.      @@@    @@@@  o  /",
+  "  | . @        @@@     `-'    . @@@@           | ",
+  "  \\      @@   @@@@@ .            @@   .        / ",
+  "   \\    @@@@  @\\@@    /  .   O    .     o   . /  ",
+  "    \\ o  @@     \\ \\  /          .    .       /   ",
+  "     \\     .    .\\.-.___    .      .   .-.  /    ",
+  "      `.          `-'                 `-' .'     ",
+  "        `.   o   / |      o    O   .    .'       ",
+  "          `-.   /      .       .     .-'         ",
+  "             `---.       .      .---'            ",
+  "                  `------------'                 "
+};
+*/
+
+// ------- Useful mathematical functions
+
+static float fixedangle(float value) { return value - 360.0 * std::floor(value / 360.0); }
+static float todeg(float value) { return value * 180.0 / M_PI; }
+static float torad(float value) { return value * M_PI / 180.0; }
+static float dsin(float value) { return std::sin(torad(value)); }
+static float dcos(float value) { return std::cos(torad(value)); }
+
 
 // ------- Lune Private Implementation
 
@@ -422,17 +515,19 @@ Lune::Lune() {
   calculatePhase();
   calculatePhaseString();
   calculateNextPhase();
+
+  t_date = calculateGregorianString(jdate);
 }
 
 
-void Lune::print() {
+/*void Lune::print() {
   if(m_phases.empty() || m_phases.size() != 5) {
     std::cerr << "[ERROR]: Unable to display data." << std::endl;
     return;
   } else {
     std::cout << "\n\n\t\t\tPhases of the Moon\n"
     << "--------------------------------------------------------------------------------\n"
-    << "\nDate: " << calculateGregorianString(jdate) << "\t\tJulian Date: " << jdate
+    << "\nDate: " << t_date << "\t\tJulian Date: " << jdate
     << "\nCurrent Phase: " << m_string
     << "\n\nNew Moon: " << m_phases[0] << "\t\tFirst Quarter Moon: " << m_phases[1]
     << "\nFull Moon: " << m_phases[2] << "\t\tLast Quarter Moon: " << m_phases[3]
@@ -484,18 +579,4 @@ void Lune::printLune() {
     ++line;
   }
 }
-
-
-// ------- Main Function
-
-
-int main(const int argc, const char *argv[]) {
-  // Initialize our variables
-  Lune moon;
-
-  // Print data to screen
-  moon.print();
-  moon.printLune();
-
-  return 0;
-}
+*/

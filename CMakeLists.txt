@@ -1,6 +1,6 @@
-#### LUNE CMAKE FILE
+#### NLUNE CMAKE FILE
 cmake_minimum_required(VERSION 3.0)
-project(lune)
+project(nlune)
 
 ## C++11 COMPILER SUPPORT
 include(CheckCXXCompilerFlag)
@@ -20,6 +20,17 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/src)
 
 ## EXECUTABLE
 add_executable(${PROJECT_NAME} ${PROJECT_SRC})
+
+## PACKAGES
+find_package(PkgConfig QUIET)
+if(PKG_CONFIG_FOUND)
+  PKG_SEARCH_MODULE(NCURSES REQUIRED ncurses)
+
+  target_include_directories(${PROJECT_NAME} PUBLIC ${NCURSES_INCLUDE_DIRS})
+  target_link_libraries(${PROJECT_NAME} PUBLIC ${NCURSES_LIBRARIES})
+else()
+  message(STATUS "ERROR: pkg-config is not installed on this system.")
+endif()
 
 ## EXAMPLES
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/examples/ $<TARGET_FILE_DIR:${PROJECT_NAME}>/examples/)
