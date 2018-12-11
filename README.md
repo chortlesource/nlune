@@ -1,21 +1,35 @@
-# Lune
+# nLune
 
-## A c++ lunar prediction tool
-
-Lune is a c++ port of Igor Chubin's pyphoon and provides a simple tool to display the current lunar phase in ascii art that visually represents the current phase of the moon. Lune also predicts the dates of the lunar phases based on current date and time.
+## A c++ ncurses interface for the lune calendar
 
 
-### INSTALLATION
-Typically I can build this project by following the following instructions
+![nlune running in terminal](gfx/nlune_screenshot.jpg?raw=true "nLune")
 
-* git clone git@github.com:chortlesource/lune.git
-* cd ./lune
+
+### Description
+
+nLune is an ncurses interface for the [lune](https://github.com/chortlesource/lune) c++ port of Igor Chubin's pyphoon; providing a simple tool to display details about the current lunar phase in the terminal window. In addition the application displays ascii art that visually represents the current phase of the moon. The application also makes predictions based on the current lunar calendar for the anticipated future phases of the moon.
+
+I have modified the [lune](https://github.com/chortlesource/lune) port in this version to act as a standalone class and so there are distinctions between `lune.hpp` and `lune.cpp` found here and that within the main [lune](https://github.com/chortlesource/lune) repository. These changes include moving the ascii art to `nlune.cpp` and removing the print functions.
+
+
+### Installation
+Typically I build this project as follows:
+* git clone git@github.com:chortlesource/nlune.git
+* cd ./nlune
 * mkdir build && cd build
 * cmake ..
-* ./lune
+* ./nlune
+
+optionally you can specify `cmake .. -DCMAKE_BUILD_TYPE=Debug` instead of `cmake ..` if you are so inclined.
 
 
-### COPYRIGHT / LICENSE
+### Future features
+
+* TODO: Parse user specified dates to show phases for specified period
+
+
+### Copyright / License
 
 Adapted from "moontool.c" by John Walker, Release 2.5 (See http://www.fourmilab.ch/moontool/)
 and Pyphoon by Igor Chubin, 2016 (See https://github.com/chubin/pyphoon)

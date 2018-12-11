@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-NLUNE - lune.hpp
+NLUNE - lune.cpp
 
 Adapted from "moontool.c" by John Walker, Release 2.5 (See http://www.fourmilab.ch/moontool/)
 and Pyphoon by Igor Chubin, 2016 (See https://github.com/chubin/pyphoon)
@@ -85,33 +85,6 @@ static const std::vector<std::string> phase_label {
   "New Moon"
 };
 
-/*static const std::vector<std::string> moon_ascii {
-  "                  .------------.                 ",
-  "             .---' o     .  .   `---.            ",
-  "          .-'   .    O    .       .  `-.         ",
-  "        .'@   @@@@@@@   .   @@@@@       `.       ",
-  "      .'@@  @@@@@@@@@@@    @@@@@@@   .    `.     ",
-  "     /    o @@@@@@@@@@@    @@@@@@@       .  \\    ",
-  "    /@  o   @@@@@@@@@@@.    @@@@@@@   O      \\   ",
-  "   /@@@   .   @@@@@@@o     @@@@@@@@@@     @@@ \\  ",
-  "  /@@@@@               .  @@@@@@@@@@@@@ o @@@@ \\ ",
-  "  |@@@@  O  `.-./  .       @@@@@@@@@@@@    @@  | ",
-  " / @@@@    --`-'       o      @@@@@@@@ @@@@     \\ ",
-  " |@ @@@     @  `           .   @@     @@@@@@@   |",
-  " |      @           o          @      @@@@@@@   |",
-  " \\       @@            .-.      @@@    @@@@  o  /",
-  "  | . @        @@@     `-'    . @@@@           | ",
-  "  \\      @@   @@@@@ .            @@   .        / ",
-  "   \\    @@@@  @\\@@    /  .   O    .     o   . /  ",
-  "    \\ o  @@     \\ \\  /          .    .       /   ",
-  "     \\     .    .\\.-.___    .      .   .-.  /    ",
-  "      `.          `-'                 `-' .'     ",
-  "        `.   o   / |      o    O   .    .'       ",
-  "          `-.   /      .       .     .-'         ",
-  "             `---.       .      .---'            ",
-  "                  `------------'                 "
-};
-*/
 
 // ------- Useful mathematical functions
 
@@ -504,7 +477,7 @@ void Lune::calculateRelativeDate(time_t *tin, time_t *tout, const int& days) {
 }
 
 
-// ------- Lune Private Implementation
+// ------- Lune Public Implementation
 
 
 Lune::Lune() {
@@ -518,65 +491,3 @@ Lune::Lune() {
 
   t_date = calculateGregorianString(jdate);
 }
-
-
-/*void Lune::print() {
-  if(m_phases.empty() || m_phases.size() != 5) {
-    std::cerr << "[ERROR]: Unable to display data." << std::endl;
-    return;
-  } else {
-    std::cout << "\n\n\t\t\tPhases of the Moon\n"
-    << "--------------------------------------------------------------------------------\n"
-    << "\nDate: " << t_date << "\t\tJulian Date: " << jdate
-    << "\nCurrent Phase: " << m_string
-    << "\n\nNew Moon: " << m_phases[0] << "\t\tFirst Quarter Moon: " << m_phases[1]
-    << "\nFull Moon: " << m_phases[2] << "\t\tLast Quarter Moon: " << m_phases[3]
-    << "\nNext New Moon: " << m_phases[4] << "\n"
-    << "--------------------------------------------------------------------------------\n"
-    << "\n"
-    << std::endl;
-  }
-}
-
-void Lune::printLune() {
-  // Figure out the phase
-  float angphase = m_phase * 2.0 * M_PI;
-  float mcap = -std::cos(angphase);
-
-  // Figure out the size of the moon
-  float yrad = moon_ascii.size() / 2.0;
-  float xrad = yrad / moon_aspect;
-
-  // Print out our moon one line at a time
-  unsigned int line = 0;
-  while(line < moon_ascii.size()) {
-    // Compute the edges of this slice
-    float y = line + 0.5 - yrad;
-    float xright = xrad * std::sqrt(1.0 - (y * y) / (yrad * yrad));
-    float xleft = -xright;
-
-    if((angphase >= 0.0) && (angphase < M_PI))
-      xleft = mcap * xleft;
-    else
-      xright = mcap * xright;
-
-    int colleft = int(xrad + 0.5) + int(xleft + 0.5);
-    int colright = int(xrad + 0.5) + int(xright + 0.5);
-
-    // Now output the slice
-    int col = 0;
-    while(col < colleft) {
-      std::cout << " ";
-      ++col;
-    }
-
-    while(col < colright) {
-      std::cout << moon_ascii[line][col];
-      ++col;
-    }
-
-    std::cout << std::endl;
-    ++line;
-  }
-}
-*/
